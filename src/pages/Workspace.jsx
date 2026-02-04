@@ -1,8 +1,20 @@
+import AnswerBox from "../components/AnswerBox";
+import ChatInput from "../components/ChatInput";
+
 export default function Workspace() {
   return (
-    <div style={{ padding: 40, color: "#e5e7eb" }}>
-      <h2>Workspace</h2>
-      <p>This is the AI workspace.</p>
+    <div style={styles.page}>
+      <AnswerBox />
+      <ChatInput />
     </div>
   );
 }
+
+const styles = {
+  page: {
+    minHeight: "calc(100vh - 60px)",
+    background: "#020617",
+    padding: 24,
+    color: "#e5e7eb",
+  },
+};

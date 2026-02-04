@@ -12,10 +12,18 @@ export default function OtpVerify() {
     }
 
     const pending = JSON.parse(localStorage.getItem("pendingUser"));
+
+    if (!pending) {
+      alert("Signup session expired. Please sign up again.");
+      navigate("/signup");
+      return;
+    }
+
+    // ✅ CONFIRM USER
     localStorage.setItem("user", JSON.stringify(pending));
     localStorage.removeItem("pendingUser");
 
-    navigate("/dashboard");
+    navigate("/");
   };
 
   return (

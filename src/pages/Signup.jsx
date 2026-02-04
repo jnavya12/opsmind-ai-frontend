@@ -13,6 +13,7 @@ export default function Signup() {
       return;
     }
 
+    // ✅ STORE AS PENDING USER
     localStorage.setItem(
       "pendingUser",
       JSON.stringify({ name, email, password }),
