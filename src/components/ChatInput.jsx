@@ -1,59 +1,53 @@
 import { useState } from "react";
 
-const ChatInput = ({ onSend, disabled }) => {
-  const [value, setValue] = useState("");
+export default function ChatInput({ onSend }) {
+  const [message, setMessage] = useState("");
 
   const handleSend = () => {
-    if (!value.trim()) return;
-    onSend(value);
-    setValue("");
+    if (!message.trim()) return;
+
+    onSend(message);
+    setMessage("");
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 12,
-        marginTop: 24,
-        position: "sticky",
-        bottom: 0,
-        background: "#020617",
-        paddingTop: 12,
-      }}
-    >
+    <div style={styles.container}>
       <input
-        type="text"
-        placeholder="Ask a question about company policies..."
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
+        style={styles.input}
+        placeholder="Ask something..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        style={{
-          flex: 1,
-          padding: "12px 14px",
-          borderRadius: 10,
-          border: "1px solid #334155",
-          background: "#020617",
-          color: "#e5e7eb",
-          outline: "none",
-        }}
       />
 
-      <button
-        onClick={handleSend}
-        disabled={disabled}
-        style={{
-          padding: "12px 18px",
-          borderRadius: 10,
-          border: "none",
-          background: disabled ? "#475569" : "#0ea5e9",
-          color: "#fff",
-          cursor: disabled ? "not-allowed" : "pointer",
-        }}
-      >
+      <button style={styles.button} onClick={handleSend}>
         Ask
       </button>
     </div>
   );
-};
+}
 
-export default ChatInput;
+const styles = {
+  container: {
+    display: "flex",
+    gap: 10,
+    marginTop: 20,
+  },
+  input: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    border: "1px solid #1e293b",
+    background: "#020617",
+    color: "#e5e7eb",
+  },
+  button: {
+    padding: "0 20px",
+    borderRadius: 8,
+    border: "none",
+    background: "#2563eb",
+    color: "#fff",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+};
