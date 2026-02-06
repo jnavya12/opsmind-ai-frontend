@@ -12,7 +12,12 @@ export default function DashboardLayout() {
       }}
     >
       <Sidebar />
-      <main style={{ flex: 1 }}>
+      <main
+        style={{
+          flex: 1,
+          overflow: "hidden",
+        }}
+      >
         <Outlet />
       </main>
     </div>

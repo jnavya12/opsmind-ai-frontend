@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../utils/auth";
-import ChatInput from "../components/ChatInput";
 import Sidebar from "../components/Sidebar";
+import ChatInput from "../components/ChatInput";
+import { logoutUser } from "../utils/auth";
 import { loadChats, saveChats } from "../utils/chatStore";
 
-/* ✅ Lazy initialization (NO setState in useEffect) */
+/* ---------- SAFE INIT (NO EFFECT SETSTATE) ---------- */
 function initChats() {
-  const loaded = loadChats();
-  if (loaded.length > 0) return loaded;
+  const stored = loadChats();
+  if (stored.length > 0) return stored;
 
   return [
     {
@@ -23,23 +23,24 @@ export default function Workspace() {
   const navigate = useNavigate();
 
   const [chats, setChats] = useState(initChats);
-  const [activeChatId, setActiveChatId] = useState(() => initChats()[0].id);
+  const [activeChatId, setActiveChatId] = useState(initChats()[0].id);
 
-  /* ✅ Persist only */
+  /* ---------- PERSIST ONLY ---------- */
   useEffect(() => {
     saveChats(chats);
   }, [chats]);
 
   const activeChat = chats.find((c) => c.id === activeChatId);
 
+  /* ---------- ACTIONS ---------- */
   const handleNewChat = () => {
-    const nc = {
+    const chat = {
       id: Date.now(),
       title: "New chat",
       messages: [],
     };
-    setChats((prev) => [nc, ...prev]);
-    setActiveChatId(nc.id);
+    setChats((prev) => [chat, ...prev]);
+    setActiveChatId(chat.id);
   };
 
   const handleRenameChat = (id, title) => {
@@ -47,7 +48,7 @@ export default function Workspace() {
   };
 
   const handleSend = (text) => {
-    if (!text.trim() || !activeChat) return;
+    if (!activeChat) return;
 
     setChats((prev) =>
       prev.map((c) =>
@@ -69,11 +70,16 @@ export default function Workspace() {
     );
   };
 
+  const handleUpload = (file) => {
+    alert(`PDF uploaded: ${file.name}`);
+  };
+
   const handleLogout = () => {
     logoutUser();
     navigate("/login", { replace: true });
   };
 
+  /* ---------- UI ---------- */
   return (
     <div
       style={{
@@ -104,7 +110,7 @@ export default function Workspace() {
             borderBottom: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          <h3 style={{ margin: 0 }}>{activeChat?.title}</h3>
+          <h3>{activeChat?.title}</h3>
           <button
             onClick={handleLogout}
             style={{
@@ -131,7 +137,7 @@ export default function Workspace() {
           }}
         >
           {!activeChat || activeChat.messages.length === 0 ? (
-            <div style={{ margin: "auto", textAlign: "center", opacity: 0.7 }}>
+            <div style={{ margin: "auto", textAlign: "center", opacity: 0.6 }}>
               <h1>How can OpsMind help you today?</h1>
               <p>Start a new chat or type below</p>
             </div>
@@ -154,7 +160,7 @@ export default function Workspace() {
           )}
         </div>
 
-        <ChatInput onSend={handleSend} />
+        <ChatInput onSend={handleSend} onUpload={handleUpload} />
       </div>
     </div>
   );

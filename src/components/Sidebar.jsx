@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./Sidebar.css";
 
 export default function Sidebar({
   chats,
@@ -10,91 +11,46 @@ export default function Sidebar({
   const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState("");
 
+  const startRename = (chat) => {
+    setEditingId(chat.id);
+    setTitle(chat.title);
+  };
+
+  const submitRename = (id) => {
+    if (title.trim()) onRenameChat(id, title.trim());
+    setEditingId(null);
+  };
+
   return (
-    <aside
-      style={{
-        width: 260,
-        background: "#0e1430",
-        color: "white",
-        padding: 16,
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        borderRight: "1px solid rgba(255,255,255,0.08)",
-      }}
-    >
-      <h2 style={{ margin: 0 }}>OpsMind AI</h2>
+    <aside className="sidebar">
+      <div className="sidebar-top">
+        <h2 className="logo">OpsMind AI</h2>
+        <button className="new-chat-btn" onClick={onNewChat}>
+          + New Chat
+        </button>
+      </div>
 
-      <button
-        onClick={onNewChat}
-        style={{
-          padding: "10px",
-          borderRadius: 10,
-          border: "none",
-          background: "#6c6cff",
-          color: "white",
-          cursor: "pointer",
-          fontWeight: 600,
-        }}
-      >
-        + New Chat
-      </button>
+      <div className="sidebar-section">
+        <p className="section-title">Recent</p>
 
-      <div style={{ marginTop: 8, opacity: 0.7 }}>Recent</div>
-
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        {chats.map((c) => (
+        {chats.map((chat) => (
           <div
-            key={c.id}
-            onClick={() => onSelectChat(c.id)}
-            style={{
-              padding: "10px",
-              borderRadius: 10,
-              marginTop: 6,
-              cursor: "pointer",
-              background: c.id === activeChatId ? "#1b214a" : "transparent",
-            }}
+            key={chat.id}
+            className={`chat-item ${chat.id === activeChatId ? "active" : ""}`}
+            onClick={() => onSelectChat(chat.id)}
+            onDoubleClick={() => startRename(chat)}
           >
-            {editingId === c.id ? (
+            {editingId === chat.id ? (
               <input
-                autoFocus
+                className="rename-input"
                 value={title}
+                autoFocus
                 onChange={(e) => setTitle(e.target.value)}
-                onBlur={() => {
-                  onRenameChat(c.id, title || "New chat");
-                  setEditingId(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onRenameChat(c.id, title || "New chat");
-                    setEditingId(null);
-                  }
-                }}
-                style={{
-                  width: "100%",
-                  background: "#0f132a",
-                  color: "white",
-                  border: "none",
-                  outline: "none",
-                  padding: "6px 8px",
-                  borderRadius: 8,
-                }}
+                onBlur={() => submitRename(chat.id)}
+                onKeyDown={(e) => e.key === "Enter" && submitRename(chat.id)}
               />
             ) : (
-              <div
-                onDoubleClick={() => {
-                  setEditingId(c.id);
-                  setTitle(c.title);
-                }}
-                title="Double-click to rename"
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {c.title}
-              </div>
+              chat.title
             )}
           </div>
         ))}
