@@ -1,99 +1,41 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../utils/auth";
+import "./Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      alert("Fill all fields");
-      return;
-    }
+  const handleLogin = (e) => {
+    e.preventDefault();
 
+    const form = e.target;
+    const email = form.email.value;
+
+    // store user email properly
     loginUser({ email });
-    navigate("/app/workspace", { replace: true });
+
+    navigate("/workspace", { replace: true });
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>OpsMind AI</h2>
+    <div className="auth-root">
+      <div className="auth-card">
+        <h1 className="brand">OpsMind AI</h1>
+        <p className="subtitle">Sign in to continue</p>
 
-        <input
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <form onSubmit={handleLogin} className="auth-form">
+          <input name="email" type="email" placeholder="Email" required />
 
-        <input
-          style={styles.input}
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input type="password" placeholder="Password" required />
 
-        <button style={styles.button} onClick={handleLogin}>
-          Login
-        </button>
+          <button type="submit">Login</button>
+        </form>
 
-        {/* ✅ SIGNUP LINK BACK */}
-        <p style={styles.link} onClick={() => navigate("/signup")}>
-          Create new account
+        <p className="switch-text">
+          New here?{" "}
+          <span onClick={() => navigate("/signup")}>Create account</span>
         </p>
       </div>
     </div>
   );
 }
-
-const styles = {
-  page: {
-    width: "100vw",
-    height: "100vh",
-    background: "#020617",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  card: {
-    width: 380,
-    padding: 32,
-    background: "#0f172a",
-    borderRadius: 16,
-  },
-  title: {
-    color: "#e5e7eb",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  input: {
-    width: "100%",
-    padding: 12,
-    marginBottom: 12,
-    background: "#020617",
-    border: "1px solid #1e293b",
-    color: "#e5e7eb",
-    borderRadius: 8,
-  },
-  button: {
-    width: "100%",
-    padding: 12,
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-  link: {
-    marginTop: 14,
-    textAlign: "center",
-    color: "#93c5fd",
-    cursor: "pointer",
-    fontSize: 13,
-  },
-};

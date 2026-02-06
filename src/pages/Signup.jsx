@@ -1,89 +1,41 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../utils/auth";
+import "./Signup.css";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleSignup = () => {
-    if (!name || !email || !password) {
-      alert("Fill all fields");
-      return;
-    }
+  const handleSignup = (e) => {
+    e.preventDefault();
 
-    // ✅ STORE AS PENDING USER
-    localStorage.setItem(
-      "pendingUser",
-      JSON.stringify({ name, email, password }),
-    );
+    const form = e.target;
+    const email = form.email.value;
 
-    navigate("/otp");
+    // same auth flow as login
+    loginUser({ email });
+
+    navigate("/workspace", { replace: true });
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Sign Up</h2>
+    <div className="auth-root">
+      <div className="auth-card">
+        <h1 className="brand">OpsMind AI</h1>
+        <p className="subtitle">Create your account</p>
 
-        <input
-          style={styles.input}
-          placeholder="Name"
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          style={styles.input}
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          style={styles.input}
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <form onSubmit={handleSignup} className="auth-form">
+          <input name="email" type="email" placeholder="Email" required />
 
-        <button style={styles.button} onClick={handleSignup}>
-          Continue
-        </button>
+          <input type="password" placeholder="Password" required />
+
+          <button type="submit">Sign up</button>
+        </form>
+
+        <p className="switch-text">
+          Already have an account?{" "}
+          <span onClick={() => navigate("/login")}>Login</span>
+        </p>
       </div>
     </div>
   );
 }
-
-const styles = {
-  page: {
-    width: "100vw",
-    minHeight: "100vh",
-    background: "#020617",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  card: {
-    width: 400,
-    padding: 32,
-    borderRadius: 16,
-    background: "#0f172a",
-  },
-  title: { color: "#e5e7eb", marginBottom: 20 },
-  input: {
-    width: "100%",
-    padding: 12,
-    marginBottom: 12,
-    background: "#020617",
-    border: "1px solid #1e293b",
-    color: "#e5e7eb",
-    borderRadius: 8,
-  },
-  button: {
-    width: "100%",
-    padding: 12,
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    fontWeight: 600,
-  },
-};

@@ -1,27 +1,20 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
 export default function DashboardLayout() {
-  const navigate = useNavigate();
-
   return (
-    <div style={styles.wrapper}>
-      <Navbar onWorkspace={() => navigate("/workspace")} />
-
-      <div style={styles.content}>
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        width: "100vw",
+        background: "#0b1020",
+      }}
+    >
+      <Sidebar />
+      <main style={{ flex: 1 }}>
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 }
-
-const styles = {
-  wrapper: {
-    minHeight: "100vh",
-    background: "radial-gradient(circle at top, #020617, #010314)",
-    color: "#e5e7eb",
-  },
-  content: {
-    height: "calc(100vh - 64px)",
-  },
-};

@@ -1,6 +1,10 @@
 import { Navigate } from "react-router-dom";
+import { isLoggedIn } from "../utils/auth";
 
 export default function ProtectedRoute({ children }) {
-  const user = localStorage.getItem("opsmind_user");
-  return user ? children : <Navigate to="/" replace />;
+  if (!isLoggedIn()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 }

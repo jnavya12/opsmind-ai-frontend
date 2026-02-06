@@ -1,53 +1,69 @@
 import { useState } from "react";
 
 export default function ChatInput({ onSend }) {
-  const [message, setMessage] = useState("");
+  const [text, setText] = useState("");
 
   const handleSend = () => {
-    if (!message.trim()) return;
+    if (!text.trim()) return;
+    onSend(text);
+    setText("");
+  };
 
-    onSend(message);
-    setMessage("");
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
-    <div style={styles.container}>
-      <input
-        style={styles.input}
-        placeholder="Ask something..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSend()}
-      />
+    <div
+      style={{
+        padding: "16px",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
+        background: "#0f132a",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          alignItems: "center",
+        }}
+      >
+        <textarea
+          placeholder="Message OpsMind…"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          rows={1}
+          style={{
+            flex: 1,
+            resize: "none",
+            padding: "12px",
+            borderRadius: "12px",
+            border: "none",
+            outline: "none",
+            background: "#1c2146",
+            color: "white",
+          }}
+        />
 
-      <button style={styles.button} onClick={handleSend}>
-        Ask
-      </button>
+        <button
+          onClick={handleSend}
+          style={{
+            padding: "10px 16px",
+            borderRadius: "12px",
+            border: "none",
+            background: "#6c6cff",
+            color: "white",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    gap: 10,
-    marginTop: 20,
-  },
-  input: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    border: "1px solid #1e293b",
-    background: "#020617",
-    color: "#e5e7eb",
-  },
-  button: {
-    padding: "0 20px",
-    borderRadius: 8,
-    border: "none",
-    background: "#2563eb",
-    color: "#fff",
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-};

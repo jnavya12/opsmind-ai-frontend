@@ -1,18 +1,19 @@
-// src/utils/chatStore.js
 import { getUser } from "./auth";
 
-const getStorageKey = () => {
+const keyForUser = () => {
   const user = getUser();
-  return user?.email ? "opsmind_chats_${user.email}" : "opsmind_chats_guest";
+  return user?.email ? `opsmind_chats_${user.email}` : "opsmind_chats_guest";
 };
 
-export const getChats = () => {
-  const key = getStorageKey();
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : [];
+export const loadChats = () => {
+  try {
+    const raw = localStorage.getItem(keyForUser());
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
 };
 
 export const saveChats = (chats) => {
-  const key = getStorageKey();
-  localStorage.setItem(key, JSON.stringify(chats));
+  localStorage.setItem(keyForUser(), JSON.stringify(chats));
 };

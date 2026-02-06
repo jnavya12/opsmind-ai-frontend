@@ -1,18 +1,18 @@
-const USER_KEY = "opsmind_user";
+const AUTH_KEY = "opsmind_user";
+
+export const loginUser = (user) => {
+  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+};
+
+export const logoutUser = () => {
+  localStorage.removeItem(AUTH_KEY);
+};
 
 export const getUser = () => {
-  const data = localStorage.getItem(USER_KEY);
+  const data = localStorage.getItem(AUTH_KEY);
   return data ? JSON.parse(data) : null;
 };
 
 export const isLoggedIn = () => {
-  return Boolean(getUser());
-};
-
-export const loginUser = (user) => {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-};
-
-export const logoutUser = () => {
-  localStorage.removeItem(USER_KEY);
+  return !!getUser();
 };
