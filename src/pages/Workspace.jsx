@@ -1,67 +1,55 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import ChatInput from "../components/ChatInput";
-import { logoutUser } from "../utils/auth";
-import { loadChats, saveChats } from "../utils/chatStore";
+import "./Workspace.css";
 
-/* ---------- SAFE INIT (NO EFFECT SETSTATE) ---------- */
-function initChats() {
-  const stored = loadChats();
-  if (stored.length > 0) return stored;
+const STORAGE_KEY = "opsmind_chats";
 
-  return [
-    {
-      id: Date.now(),
-      title: "New chat",
-      messages: [],
-    },
-  ];
-}
+const createChat = () => ({
+  id: crypto.randomUUID(),
+  title: "New chat",
+  messages: [],
+});
 
 export default function Workspace() {
-  const navigate = useNavigate();
+  const [chats, setChats] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [createChat()];
+  });
 
-  const [chats, setChats] = useState(initChats);
-  const [activeChatId, setActiveChatId] = useState(initChats()[0].id);
+  const [activeChatId, setActiveChatId] = useState(() => chats[0].id);
 
-  /* ---------- PERSIST ONLY ---------- */
   useEffect(() => {
-    saveChats(chats);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
   }, [chats]);
 
   const activeChat = chats.find((c) => c.id === activeChatId);
 
-  /* ---------- ACTIONS ---------- */
   const handleNewChat = () => {
-    const chat = {
-      id: Date.now(),
-      title: "New chat",
-      messages: [],
-    };
-    setChats((prev) => [chat, ...prev]);
+    const chat = createChat();
+    setChats((p) => [chat, ...p]);
     setActiveChatId(chat.id);
   };
 
-  const handleRenameChat = (id, title) => {
-    setChats((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
-  };
-
-  const handleSend = (text) => {
-    if (!activeChat) return;
+  const handleSend = ({ text, file }) => {
+    if (!text && !file) return;
 
     setChats((prev) =>
       prev.map((c) =>
-        c.id === activeChat.id
+        c.id === activeChatId
           ? {
               ...c,
               messages: [
                 ...c.messages,
-                { id: Date.now(), role: "user", text },
+                ...(text ? [{ role: "user", text }] : []),
+                ...(file
+                  ? [{ role: "user", text: file.name, file: true }]
+                  : []),
                 {
-                  id: Date.now() + 1,
                   role: "ai",
-                  text: "This is a simulated AI response from OpsMind ✨",
+                  text: file
+                    ? "PDF received. Ask anything about it 📄"
+                    : "This is a simulated AI response ✨",
                 },
               ],
             }
@@ -70,97 +58,41 @@ export default function Workspace() {
     );
   };
 
-  const handleUpload = (file) => {
-    alert(`PDF uploaded: ${file.name}`);
-  };
-
-  const handleLogout = () => {
-    logoutUser();
-    navigate("/login", { replace: true });
-  };
-
-  /* ---------- UI ---------- */
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        background: "#0b0e1a",
-        color: "white",
-      }}
-    >
+    <div className="workspace-root">
       <Sidebar
         chats={chats}
         activeChatId={activeChatId}
         onNewChat={handleNewChat}
         onSelectChat={setActiveChatId}
-        onRenameChat={handleRenameChat}
       />
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className="workspace-main">
         {/* TOP BAR */}
-        <div
-          style={{
-            height: 60,
-            padding: "0 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            background: "#0f132a",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
+        <div className="workspace-topbar">
           <h3>{activeChat?.title}</h3>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: "8px 14px",
-              borderRadius: 8,
-              border: "1px solid #444",
-              background: "transparent",
-              color: "white",
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
+          <button className="logout-btn">Logout</button>
         </div>
 
-        {/* CHAT AREA */}
-        <div
-          style={{
-            flex: 1,
-            padding: 32,
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {!activeChat || activeChat.messages.length === 0 ? (
-            <div style={{ margin: "auto", textAlign: "center", opacity: 0.6 }}>
+        {/* MESSAGES */}
+        <div className="messages">
+          {activeChat.messages.length === 0 ? (
+            <div className="welcome">
+              <div className="orb" />
               <h1>How can OpsMind help you today?</h1>
               <p>Start a new chat or type below</p>
             </div>
           ) : (
-            activeChat.messages.map((m) => (
-              <div
-                key={m.id}
-                style={{
-                  maxWidth: "60%",
-                  marginBottom: 16,
-                  alignSelf: m.role === "user" ? "flex-end" : "flex-start",
-                  background: m.role === "user" ? "#6c6cff" : "#1b1f36",
-                  padding: "12px 16px",
-                  borderRadius: 14,
-                }}
-              >
-                {m.text}
+            activeChat.messages.map((m, i) => (
+              <div key={i} className={`message ${m.role}`}>
+                {m.file ? `📄 ${m.text}` : m.text}
               </div>
             ))
           )}
         </div>
 
-        <ChatInput onSend={handleSend} onUpload={handleUpload} />
+        {/* INPUT */}
+        <ChatInput onSend={handleSend} />
       </div>
     </div>
   );

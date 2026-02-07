@@ -1,30 +1,33 @@
 export default function FileUpload({ onUpload }) {
-  const handleFile = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-    if (file.type !== "application/pdf") {
-      alert("Only PDF files allowed");
-      return;
-    }
-    onUpload(file);
+
+    onUpload(file); // 🔥 SEND FILE UP
+    e.target.value = ""; // reset
   };
 
   return (
     <label
       style={{
-        marginRight: 12,
+        width: 36,
+        height: 36,
+        borderRadius: 8,
+        background: "#1b1f36",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         cursor: "pointer",
-        color: "#aaa",
         fontSize: 18,
       }}
-      title="Upload PDF"
+      title="Upload file"
     >
       📎
       <input
         type="file"
-        accept="application/pdf"
-        hidden
-        onChange={handleFile}
+        accept=".pdf"
+        onChange={handleFileChange}
+        style={{ display: "none" }}
       />
     </label>
   );

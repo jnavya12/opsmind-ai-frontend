@@ -6,51 +6,50 @@ export default function Sidebar({
   activeChatId,
   onNewChat,
   onSelectChat,
-  onRenameChat,
 }) {
   const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState("");
 
-  const startRename = (chat) => {
+  const startEdit = (chat) => {
     setEditingId(chat.id);
     setTitle(chat.title);
   };
 
-  const submitRename = (id) => {
-    if (title.trim()) onRenameChat(id, title.trim());
+  const saveEdit = () => {
+    if (!title.trim()) return;
+    chats.find((c) => c.id === editingId).title = title.trim();
     setEditingId(null);
   };
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-top">
-        <h2 className="logo">OpsMind AI</h2>
+      <div className="sidebar-header">
+        <h2>OpsMind AI</h2>
         <button className="new-chat-btn" onClick={onNewChat}>
           + New Chat
         </button>
       </div>
 
-      <div className="sidebar-section">
-        <p className="section-title">Recent</p>
+      <div className="sidebar-section">Recent</div>
 
+      <div className="chat-list">
         {chats.map((chat) => (
           <div
             key={chat.id}
             className={`chat-item ${chat.id === activeChatId ? "active" : ""}`}
             onClick={() => onSelectChat(chat.id)}
-            onDoubleClick={() => startRename(chat)}
+            onDoubleClick={() => startEdit(chat)}
           >
             {editingId === chat.id ? (
               <input
-                className="rename-input"
-                value={title}
                 autoFocus
+                value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                onBlur={() => submitRename(chat.id)}
-                onKeyDown={(e) => e.key === "Enter" && submitRename(chat.id)}
+                onBlur={saveEdit}
+                onKeyDown={(e) => e.key === "Enter" && saveEdit()}
               />
             ) : (
-              chat.title
+              <span>{chat.title}</span>
             )}
           </div>
         ))}
