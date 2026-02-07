@@ -1,98 +1,112 @@
-import { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
-import ChatInput from "../components/ChatInput";
-import "./Workspace.css";
-
-const STORAGE_KEY = "opsmind_chats";
-
-const createChat = () => ({
-  id: crypto.randomUUID(),
-  title: "New chat",
-  messages: [],
-});
+import { useRef, useState } from "react";
+import "./workspace.css";
 
 export default function Workspace() {
-  const [chats, setChats] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [createChat()];
-  });
+  const fileInputRef = useRef(null);
 
-  const [activeChatId, setActiveChatId] = useState(() => chats[0].id);
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
+  const [file, setFile] = useState(null);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
-  }, [chats]);
-
-  const activeChat = chats.find((c) => c.id === activeChatId);
-
-  const handleNewChat = () => {
-    const chat = createChat();
-    setChats((p) => [chat, ...p]);
-    setActiveChatId(chat.id);
+  const handleFileClick = () => {
+    fileInputRef.current.click();
   };
 
-  const handleSend = ({ text, file }) => {
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (!selected) return;
+    setFile(selected);
+  };
+
+  const handleSend = () => {
     if (!text && !file) return;
 
-    setChats((prev) =>
-      prev.map((c) =>
-        c.id === activeChatId
-          ? {
-              ...c,
-              messages: [
-                ...c.messages,
-                ...(text ? [{ role: "user", text }] : []),
-                ...(file
-                  ? [{ role: "user", text: file.name, file: true }]
-                  : []),
-                {
-                  role: "ai",
-                  text: file
-                    ? "PDF received. Ask anything about it 📄"
-                    : "This is a simulated AI response ✨",
-                },
-              ],
-            }
-          : c,
-      ),
-    );
+    const newMessages = [];
+
+    if (text) {
+      newMessages.push({
+        type: "user",
+        content: text,
+      });
+    }
+
+    if (file) {
+      newMessages.push({
+        type: "file",
+        content: file.name,
+      });
+    }
+
+    setMessages((prev) => [...prev, ...newMessages]);
+
+    // reset
+    setText("");
+    setFile(null);
+    fileInputRef.current.value = "";
   };
 
   return (
-    <div className="workspace-root">
-      <Sidebar
-        chats={chats}
-        activeChatId={activeChatId}
-        onNewChat={handleNewChat}
-        onSelectChat={setActiveChatId}
-      />
+    <div className="workspace-main">
+      {/* CHAT AREA */}
+      <div className="messages">
+        {messages.length === 0 && (
+          <div className="welcome">
+            <div className="orb"></div>
+            <h1>How can OpsMind help you today?</h1>
+            <p>Start a new chat or type below</p>
+          </div>
+        )}
 
-      <div className="workspace-main">
-        {/* TOP BAR */}
-        <div className="workspace-topbar">
-          <h3>{activeChat?.title}</h3>
-          <button className="logout-btn">Logout</button>
-        </div>
-
-        {/* MESSAGES */}
-        <div className="messages">
-          {activeChat.messages.length === 0 ? (
-            <div className="welcome">
-              <div className="orb" />
-              <h1>How can OpsMind help you today?</h1>
-              <p>Start a new chat or type below</p>
-            </div>
-          ) : (
-            activeChat.messages.map((m, i) => (
-              <div key={i} className={`message ${m.role}`}>
-                {m.file ? `📄 ${m.text}` : m.text}
+        {messages.map((msg, i) => {
+          if (msg.type === "user") {
+            return (
+              <div key={i} className="message user">
+                {msg.content}
               </div>
-            ))
-          )}
-        </div>
+            );
+          }
 
-        {/* INPUT */}
-        <ChatInput onSend={handleSend} />
+          if (msg.type === "file") {
+            return (
+              <div key={i} className="message user file">
+                📄 {msg.content}
+              </div>
+            );
+          }
+
+          return null;
+        })}
+      </div>
+
+      {/* INPUT BAR */}
+      <div className="chat-input">
+        <button className="upload-btn" onClick={handleFileClick}>
+          📎
+        </button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,.pdf"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+
+        <input
+          type="text"
+          placeholder="Message OpsMind..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        />
+
+        <button
+          className="send-btn"
+          onClick={handleSend}
+          disabled={!text && !file}
+        >
+          Send
+        </button>
       </div>
     </div>
   );

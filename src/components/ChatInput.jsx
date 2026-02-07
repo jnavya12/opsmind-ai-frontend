@@ -1,46 +1,29 @@
 import { useState } from "react";
-import "./ChatInput.css";
 
 export default function ChatInput({ onSend }) {
   const [text, setText] = useState("");
-  const [file, setFile] = useState(null);
 
-  const send = () => {
-    if (!text.trim() && !file) return;
-    onSend({ text: text.trim(), file });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    onSend(text);
     setText("");
-    setFile(null);
   };
 
   return (
-    <div className="chat-input-wrapper">
-      {file && (
-        <div className="file-preview">
-          📎 {file.name}
-          <span onClick={() => setFile(null)}>✕</span>
-        </div>
-      )}
-
+    <form className="chat-input-wrapper" onSubmit={handleSubmit}>
       <div className="chat-input">
-        <label className="upload-btn">
-          📎
-          <input
-            type="file"
-            hidden
-            accept=".pdf,image/*"
-            onChange={(e) => setFile(e.target.files[0])}
-          />
-        </label>
+        <span className="clip">📎</span>
 
         <input
+          type="text"
+          placeholder="Message OpsMind..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Message OpsMind..."
-          onKeyDown={(e) => e.key === "Enter" && send()}
         />
 
-        <button onClick={send}>Send</button>
+        <button type="submit">Send</button>
       </div>
-    </div>
+    </form>
   );
 }
